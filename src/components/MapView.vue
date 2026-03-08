@@ -49,6 +49,10 @@ onMounted(async () => {
 
   map = L.map(mapContainer.value).setView([38.9, -95.7], 4)
 
+  map.on('dragstart', () => {
+    geojsonLayer?.eachLayer(l => (l as L.Path).closeTooltip())
+  })
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
@@ -69,7 +73,7 @@ onMounted(async () => {
         const districtLabel = district === 0 || district === -1
           ? 'At Large'
           : `District ${Math.round(district)}`
-        layer.bindTooltip(`${statename} — ${districtLabel}`, { sticky: true })
+        layer.bindTooltip(`${statename} — ${districtLabel}`, { sticky: true, offset: [12, 0] })
 
         layer.on({
           mouseover(e) {
