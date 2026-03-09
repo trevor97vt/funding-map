@@ -24,6 +24,7 @@ interface Candidate {
   principal_committees: Committee[]
 }
 
+const activeTab = ref('congressional-funding')
 const selectedDistrict = ref<DistrictProperties | null>(null)
 const candidates = ref<Candidate[]>([])
 const candidatesLoading = ref(false)
@@ -73,11 +74,28 @@ watch(selectedDistrict, async (district) => {
 <template>
   <div class="app">
     <header class="app-header">
-      <h1>Congressional Funding Map</h1>
+      <h1>Campaign Finance Explorer</h1>
     </header>
+    <nav class="app-nav">
+      <button 
+        class="nav-tab" 
+        :class="{ active: activeTab === 'congressional-funding' }"
+        @click="activeTab = 'congressional-funding'"
+      >
+        Congressional Funding Map
+      </button>
+      <button 
+        class="nav-tab" 
+        :class="{ active: activeTab === 'committees' }"
+        @click="activeTab = 'committees'"
+      >
+        Committees
+      </button>
+    </nav>
     <div class="app-body">
-      <MapView @district-select="selectedDistrict = $event" />
-      <div class="overlay">
+      <div v-if="activeTab === 'congressional-funding'" class="tab-content">
+        <MapView @district-select="selectedDistrict = $event" />
+        <div class="overlay">
         <Card class="info-card">
           <template #content>
             <template v-if="selectedDistrict">
@@ -101,10 +119,10 @@ watch(selectedDistrict, async (district) => {
                 >
                   <AccordionHeader>
                     <div class="candidate-header">
-                      <span class="candidate-name">{{ toTitleCase(c.name) }}</span>
                       <span class="party-badge" :class="c.party.toLowerCase()">
                         {{ c.party }}
                       </span>
+                      <span class="candidate-name">{{ toTitleCase(c.name) }}</span>
                     </div>
                   </AccordionHeader>
                   <AccordionContent>
@@ -129,6 +147,16 @@ watch(selectedDistrict, async (district) => {
             </p>
           </template>
         </Card>
+        </div>
+      </div>
+      <div v-else-if="activeTab === 'committees'" class="tab-content">
+        <div class="committees-placeholder">
+          <Card>
+            <template #content>
+              <p>Committee data coming soon...</p>
+            </template>
+          </Card>
+        </div>
       </div>
     </div>
   </div>
@@ -156,10 +184,64 @@ watch(selectedDistrict, async (district) => {
   letter-spacing: 0.02em;
 }
 
+.app-nav {
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+  color: #1e293b;
+}
+
+.nav-tab.active {
+  color: #1a3a5c;
+  border-bottom-color: #1a3a5c;
+  background-color: #fff;
+}
+
 .app-body {
   position: relative;
   flex: 1;
   overflow: hidden;
+}
+
+.tab-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.committees-placeholder {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.committees-placeholder .p-card {
+  min-width: 300px;
+  text-align: center;
+}
+
+.committees-placeholder p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .overlay {
